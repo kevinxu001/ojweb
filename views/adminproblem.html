@@ -1,0 +1,84 @@
+
+{{if .IsError}}
+	{{.ErrorMsg}}<a target="_top" href="/">登录</a>
+{{end}}
+<html>
+<head>
+	<meta http-equiv="Content-Language" content="zh-cn">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>KingOJ - 题库管理</title>
+	<link href="/static/css/style.css" type="text/css" rel="stylesheet">
+<script>var myName='{{.UserName}}';</script>
+<script type="text/javascript" src="/static/js/jquery-1.4.4.js"></script>
+<script type="text/javascript" src="/static/js/jquery.table.js"></script>
+</head>
+
+<body>
+<!--
+if(!isset($_REQUEST["id"])){
+	if(!file_exists("d:\\kingoj\\test\\prob.txt"))
+		die("没有题目！\n</body>\n</html>");
+
+	$handle=fopen("d:\\kingoj\\test\\prob.txt", "r");
+	list($ps)=fscanf($handle, "%d");
+	if(file_exists("d:\\kingoj\\test\\probset.dat")){
+		$file2=fopen("d:\\kingoj\\test\\probset.dat", "r");
+		$iszero=1;
+	}else {
+		$iszero=0;
+	}
+-->
+<h1>KingOJ - 题库管理</h1>
+<table border="0" cellspacing="1" cellpadding="5" width="100%">
+<thead>
+	<tr>
+		<th>序号</th>
+		<th>题目</th>
+		<th>通过</th>
+		<th>提交</th>
+		<th>正确率</th>
+		<th>关键词</th>
+	</tr>
+</thead>
+<tbody>
+<?
+	for($i=1; $i<=$ps; $i++){
+		list($pn)=fscanf($handle, "%s");
+		printf("<tr><td>%d</td><td><a href=\"problem?id=%s\">%s</a></td>", $i, $pn, $pn);
+		if($iszero==1){
+			list($acTotal, $subTotal)=fscanf($file2, "%d %d");
+			if($subTotal>0)
+				printf("<td>%d</td><td>%d</td><td>%d%%</td>", $acTotal, $subTotal, $acTotal*100/$subTotal);
+			else
+				printf("<td>0</td><td>0</td><td>0</td>");
+		}else{
+			printf("<td>0</td><td>0</td><td>0</td>");
+		}
+		printf("<td>&nbsp;</td></tr>\n");
+	}
+?>
+</tbody>
+</table>
+<?}else{
+	if(!file_exists("d:\\kingoj\\test\\prob\\$id\\prob.html"))
+		die("题号错误！\n</body>\n</html>");
+
+	include "d:\\kingoj\\test\\prob\\$id\\prob.html";
+?>
+<hr>
+<form method="post" enctype="multipart/form-data" action="submit.php">
+	<input type="hidden" name="prob" value="<? echo $_REQUEST["id"];?>">
+	<input type="hidden" name="max_file_size" value="10000">
+	<p>语言：
+	<select name="lang" size="1">
+		<option value="2">Pascal</option>
+		<option value="1">C++</option>
+	</select>
+	文件：
+	<input type="file" name="program">
+	<input type="submit" value=" 提交 ">
+	</p>
+</form>
+<?}?>
+</body>
+</html>

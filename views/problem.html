@@ -1,0 +1,78 @@
+<html>
+<head>
+	<meta http-equiv="Content-Language" content="zh-cn">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>KingOJ - 题库</title>
+	<link href="/static/css/style.css" type="text/css" rel="stylesheet">
+	<script>var myName='{{.UserName}}';</script>
+	<script type="text/javascript" src="/static/js/jquery-1.4.4.js"></script>
+	<script type="text/javascript" src="/static/js/jquery.table.js"></script>
+</head>
+
+<body>
+	<h1>KingOJ - 题库</h1>
+	<hr>
+	{{if .IsLogin}}
+	{{if .IsMatchStart}}
+		{{if .IsProbList}}
+	<table border="0" cellspacing="1" cellpadding="5" width="100%">
+		<thead>
+			<tr>
+				<th>序号</th>
+				<th>题目</th>
+				<th>通过</th>
+				<th>提交</th>
+				<th>正确率</th>
+			</tr>
+		</thead>
+		<tbody>
+			{{$ProbInfos := .ProbInfos}}
+
+{{range $k,$probinfo := $ProbInfos}}
+			<tr>
+				<td>{{$probinfo.Id}}</td>
+				<td>
+					<a href="problem?probname={{$probinfo.ProbName}}">{{$probinfo.ProbName}}</a>
+				</td>
+				<td>{{$probinfo.AcTotal}}</td>
+				<td>{{$probinfo.SubTotal}}</td>
+				<td>{{$probinfo.CorrectPercent}}%</td>
+			</tr>
+			{{end}}
+		</tbody>
+	</table>
+	{{else}}
+
+{{if .IsError}}
+	{{.ErrorMsg}}
+{{else}}
+	{{.ProbHtml | str2html}}
+{{end}}
+	<hr>
+	<form method="post" enctype="multipart/form-data" action="/submit">
+		<input type="hidden" name="probname" value="{{.ProbName}}">
+		<input type="hidden" name="max_file_size" value="10000">
+		<p>
+			语言：
+			<select name="lang" size="1">
+				<option value="2">Pascal</option>
+				<option value="1">C++</option>
+			</select>
+			文件：
+			<input type="file" name="program">
+			<input type="submit" value=" 提交 "></p>
+	</form>
+	{{end}}
+	{{else}}
+	<p class="msg1">比赛尚未开始。</p>
+	{{end}}
+
+{{else}}
+	<p class="msg1">
+		请先
+		<a target="_top" href="/">登录</a>
+		！
+	</p>
+	{{end}}
+</body>
+</html>

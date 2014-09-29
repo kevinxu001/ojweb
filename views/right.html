@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="zh-cn">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>KingOJ - 首页</title>
+<link href="/static/css/style.css" type="text/css" rel="stylesheet">
+</head>
+<body>
+<h1>Jin Bin's ACM Online Judge System</h1>
+<hr>
+
+{{if .MatchStop}}
+<p class="msg1">比赛尚未开始。</p>
+{{end}}
+
+<ol>
+	<li>请先<a href="reg.php">注册</a>；</li>
+	<li>然后<a target="_top" href="index.php">登录</a>；</li>
+	<li>在<a href="problem.php">题库</a>中浏览试题，点击试题名称，打开试题；</li>
+	<li>完成程序的编写，调试正确；</li>
+	<li>通过试题下方的“浏览”按钮，找到你保存的源程序，通过“提交”按钮提交；也可以通过<a href="submit.php">提交</a>页面提交；</li>
+	<li>在<a href="status.php">状态</a>中可以查看评测结果；</li>
+	<li>在<a href="standing.php">排名</a>中可以查看排行榜；</li>
+	<li><a href="FAQ.html">帮助</a>中有更详细的说明。</li>
+</ol>
+</body>
+</html>

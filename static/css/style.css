@@ -1,0 +1,142 @@
+* {
+	font-size:10pt;
+	font-family:Verdana, Geneva, Arial, Helvetica, sans-serif;
+}
+
+body {
+background-color:#f0f7fc;
+background-image:url(../img/bg.gif);
+background-repeat:repeat-x;
+background-attachment: fixed;
+scrollbar-face-color:#e0e5ef;
+scrollbar-highlight-color:#6587b9;
+scrollbar-shadow-color:#cdcdcd;
+scrollbar-3dlight-color:#cdcdcd;
+scrollbar-arrow-color:#000;
+scrollbar-track-color:#f0f0f0;
+scrollbar-darkshadow-color:#000;
+}
+
+h1 {
+color:#248;
+font-size:18pt;
+font-family:ºÚÌå;
+font-weight: bold;
+text-align: center
+}
+
+h2 {
+color:#248;
+font-size:15pt;
+font-family:ºÚÌå;
+}
+
+ul {
+margin:1px 1px 1px 10px;
+padding:1px 1px 1px 10px;
+}
+
+a:link {
+color:#000080;
+text-decoration:none;
+}
+
+a:visited {
+color:#003399;
+text-decoration:none;
+}
+
+a:hover {
+color:red;
+left:1px;
+position:relative;
+text-decoration:underline;
+top:1px;
+}
+
+
+
+thead a:link {color:#FFFFFF;text-decoration:none;}
+thead a:visited {color:#FFFFFF;text-decoration:none;}
+
+
+
+.dh {
+font-size:10pt;
+}
+
+hr {
+color:#6587b9;
+height:1px;
+}
+
+.frm {
+border-right:#000 1px solid;
+border-top:#000 1px solid;
+border-left:#000 1px solid;
+border-bottom:#000 1px solid;
+background-color:#f0f9ff;
+font-size:12px;
+font-family:Verdana, Arial;
+}
+
+small {
+font-size:12px;
+font-family:Verdana, Arial;
+}
+
+li {
+list-style-position:inside;
+margin:1px 1px 1px 10px;
+}
+
+.frow {
+background-color:#a0d5ff;
+}
+
+.btab {
+color:#125;
+}
+
+.inp {
+color:#125;
+border-color:#f0f5ff;
+border-style:groove;
+}
+
+select {
+color:#125;
+background-color:#fff;
+border-color:#f0f5ff;
+border-style:groove;
+}
+
+p { text-indent: 2em; line-height: 120% }
+ol, li { text-indent: 0em; line-height: 180% }
+
+pre{ padding:10px; border-style: dotted; border-width: 1px; background-color: #E0E0E0; width:80%; font-family:"Courier New", 宋体}
+
+#timer{ text-align: center; font-family: Arial Black; color: #FF0000; font-size: 14px; width: 100%; height: 30px; line-height:200%}
+
+.title{ color: #FF0000; font-weight: bold; text-align: center; height: 30px;font-size:25px}
+.msg1 { color: #FF0000; font-weight: bold; text-align: center; height: 30px;}
+.msg2 { color: #000000; text-align: center; height: 30px; line-height: 150% }
+
+#frmStart{ text-align: center;}
+#btnStart{ width: 80px;}
+
+#menu{ text-align: center;}
+#menu li{ list-style-type: none; left:-25; height: 25; position:relative }
+
+table *{border-style: solid; border-width: 0;text-align: center;}
+td { td:expression(this.noWrap=true) }
+tr.st1 { background-color:#FFFFFF;}
+tr.st2 { background-color:#ECF1F9;}
+tr.showme{font-weight: bold; background-color: #FFCC99;}
+tr.showme a{color: #FF0000;}
+tr.showme a:visited{color: #FF0000;}
+tr.over{ background-color: #BAD0FC;}
+tr.hide{display:none}
+table thead { background-color:#000080;color: #FFFFFF;}
+table tbody tr{ background-color:#FFFFFF;color: #000000;}
+table thead th.sortHand{ cursor: pointer;}

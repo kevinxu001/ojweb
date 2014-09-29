@@ -1,0 +1,64 @@
+
+<html>
+<head>
+<meta http-equiv="Content-Language" content="zh-cn">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>KingOJ - 排行</title>
+<meta http-equiv="Refresh" content="60; URL=/standing">
+<link href="/static/css/style.css" type="text/css" rel="stylesheet">
+<script>var myName='<?echo $_COOKIE['luser']?>';</script>
+<script type="text/javascript" src="/static/js/jquery-1.4.4.js"></script>
+<script type="text/javascript" src="/static/js/jquery.table.js"></script>
+<script>
+	$(function() {
+		$("th").each(function(i){
+			if(i!=0 && i<$("th").size()-2){
+				var txt=$.trim($(this).text());
+				$(this).html("<a href=\"problem?probname=" + txt + "\">" + txt + "</a>");
+			}
+		})
+
+		$("tbody tr:has(td:contains('"+myName+"')) td").each(function(i){
+			var txt=$.trim($(this).text());
+			if(!txt){//未做的
+				$(this).html("<a href=\"problem?probname=" + $("thead tr th:nth-child(" + (i + 1) + ")").text() + "\">未做</a>");
+			}else if(txt.substr(0,2)=="(-"){//做错的
+				$(this).html("<a href=\"problem?probname=" + $("thead tr th:nth-child(" + (i + 1) + ")").text() + "\">" + txt + "</a>");
+			}
+		})
+
+	});
+
+	function RndNum(n){
+		var rnd="";
+		for(var i=0;i<n;i++)
+			rnd+=Math.floor(Math.random()*10);
+		return rnd;
+	};
+</script>
+</head>
+
+<body>
+<h1>KingOJ - 排行</h1>
+{{if .IsLogin}}
+	{{if .IsMatchStart}}
+		<p>
+			<script>
+			document.write("<a href=\"/standing?"+RndNum(7)+"\">刷新</a>")
+			</script>
+		</p>
+		{{.RankHtml | str2html}}
+	{{else}}
+	<p class="msg1">比赛尚未开始。</p>
+	{{end}}
+
+{{else}}
+	<p class="msg1">
+		请先
+		<a target="_top" href="/">登录</a>
+		！
+	</p>
+{{end}}
+<p>注：+，通过；-，错误；()内数字，提交次数；()外数字，提交时间</p>
+</body>
+</html>

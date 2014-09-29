@@ -1,0 +1,77 @@
+<html>
+
+<head>
+	<meta http-equiv="Content-Language" content="zh-cn">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>KingOJ - 提交</title>
+	<link href="/static/css/style.css" type="text/css" rel="stylesheet"></head>
+
+<body>
+	<h1>KingOJ - 提交</h1>
+	<hr>
+{{if .IsLogin}}
+	{{if .IsMatchStart}}
+		{{if .IsAdmin}}
+			<p class="msg1">管理员不能参赛！</p>
+		{{else}}
+			{{if .IsProbList}}
+	<form name="form1" id="form1" method="post" enctype="multipart/form-data" action="/submit" onSubmit="return CheckForm();">
+		<input type="hidden" name="max_file_size" value="10000">
+		<p>
+			语言：
+			<select name="lang" size="1">
+				<option value="2">Pascal</option>
+				<option value="1">C++</option>
+			</select>
+			题目：
+			<select size="1" name="probname">
+				<option value="">请选择题目：</option>
+				{{range $k,$probinfo := .ProbInfos}}
+				<option value="{{$probinfo.ProbName}}">({{$probinfo.Id}}) {{$probinfo.ProbName}}</option>
+				{{end}}
+
+			</select>
+		</p>
+		<p>
+			文件：
+			<input type="file" name="program">
+			<input type="submit" value="提交">
+			<br>
+	</form>
+	<script language="JavaScript" type="text/javascript">
+
+function CheckForm()
+{
+	if(document.form1.probname.value==""){
+		alert("请选择题目！");
+		document.form1.probname.focus();
+		return false;
+	}
+	return true;
+}
+</script>
+
+			{{else}}
+				{{if .IsError}}
+					{{.ErrorMsg}} <a href='javascript:history.back();'>返回</a>
+				{{else}}
+					<META HTTP-EQUIV="Refresh" CONTENT="1; URL=/status">
+					文件上传成功！
+				{{end}}
+			{{end}}
+
+		{{end}}
+	{{else}}
+		<p class="msg1">比赛尚未开始。</p>
+	{{end}}
+
+{{else}}
+	<p class="msg1">
+		请先
+		<a target="_top" href="/">登录</a>
+		！
+	</p>
+{{end}}
+
+</body>
+</html>

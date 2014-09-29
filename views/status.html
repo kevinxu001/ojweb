@@ -1,0 +1,61 @@
+<html>
+<head>
+	<meta http-equiv="Content-Language" content="zh-cn">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>KingOJ - 状态</title>
+	<meta http-equiv="Refresh" content="30; URL=/status">
+	<link href="/static/css/style.css" type="text/css" rel="stylesheet">
+	<script>var myName='<?echo $_COOKIE['luser']?>';</script>
+	<script type="text/javascript" src="/static/js/jquery-1.4.4.js"></script>
+	<script type="text/javascript" src="/static/js/jquery.table.js"></script>
+	<script>
+	$(function() {
+		$("tbody td:nth-child(2)").each(function(i){
+			var txt=$.trim($(this).text());
+			$(this).html("<a href=\"problem?probname=" + txt + "\">" + txt + "</a>");
+		});
+	});
+
+	function RndNum(n){
+		var rnd="";
+		for(var i=0;i<n;i++)
+			rnd+=Math.floor(Math.random()*10);
+		return rnd;
+	};
+
+</script>
+</head>
+
+<body>
+	<h1>KingOJ - 状态</h1>
+{{if .IsLogin}}
+	{{if .IsMatchStart}}
+		<p>
+			<script>
+			document.write("<a href=\"/status?"+RndNum(7)+"\">刷新</a>")
+			</script>
+		</p>
+		{{.StatusHtml | str2html}}
+	{{else}}
+	<p class="msg1">比赛尚未开始。</p>
+	{{end}}
+
+{{else}}
+	<p class="msg1">
+		请先
+		<a target="_top" href="/">登录</a>
+		！
+	</p>
+{{end}}
+
+<p>
+最新40条记录。注： <font color="green">Accepted：通过</font>
+| <font color="red">Compile Error：编译错误</font>
+|
+<font color="red">Presentation Error：格式错误</font>
+|
+<font color="red">Wrong Answer：结果错误</font>
+</p>
+
+</body>
+</html>

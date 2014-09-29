@@ -1,0 +1,109 @@
+
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="zh-cn">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>KingOJ</title>
+<link href="/static/css/style.css" type="text/css" rel="stylesheet">
+
+{{if .IsMatchStart}}
+<script type="text/javascript" src="/static/js/jquery-1.4.4.js"></script>
+<script type="text/javascript">
+	var startTime;
+
+	function initCount(secondsLeft) {
+		var now = new Date();
+		return now.getTime() + secondsLeft * 1000;
+	}
+
+	function count1(i) {
+		i = i - i % 1;
+		return i;
+	}
+
+	function count2(i) {
+		i = i - i % 1;
+		if (i < 10) return "0" + i;
+		return i;
+		return (i < 10) ? "0" + i: i;
+	}
+
+	function updateClock(head, oTarget, startTime) {
+		var now = new Date();
+		var delta = (now.getTime() - startTime) / 1000;
+		var s, x;
+		s = head;
+		s = s + count1((delta / 3600)) + ":";
+		s = s + count2((delta / 60) % 60) + ":";
+		s = s + count2(delta % 60);
+		setTimeout("updateClock('" + head + "','" + oTarget + "'," + startTime + ")", 1000);
+		$('#' + oTarget).text(s);
+	}
+
+	$(function() {
+		startTime = initCount(-{{.DurationSeconds}});
+		updateClock('', 'timer', startTime);
+	});
+</script>
+</head>
+<body>
+	<div id="timer"></div>
+
+{{else}}
+
+</head>
+<body topmargin="6" leftmargin="6">
+	<div class="title">KingOJ</div>
+{{end}}
+
+{{if .IsLogin}}
+	<div class="msg1">{{.UserName}}</div>
+	<div class="msg2">登录成功<br />欢迎到来</div>
+{{else}}
+	<form name="form1" method="post" action="/check">
+		账号:<br /><input name="username" id="user" size="10" type="text"><br /><br />
+		密码:<br /><input name="password" id="pass" size="10" type="password"><br /><br />
+		<input class="frm" type="submit" value=" 登 录 ">
+  </form>
+{{end}}
+
+{{if .IsAdmin}}
+	<form name="frmStart" id="frmStart" method="post" action="/match">
+{{if .IsMatchStart}}
+		<input id="btnStart" class="frm" type="submit" value="结束比赛">
+{{else}}
+		<input id="btnStart" class="frm" type="submit" value="开始比赛">
+{{end}}
+	</form>
+{{end}}
+
+	<ul id="menu">
+	<li></li>
+{{if .IsLogin}}
+{{else}}
+	<li><a target="main" href="/reg">注册</a></li>
+{{end}}
+	<li><a target="main" href="/right">首页</a></li>
+{{if .IsLogin}}
+	<li>----</li>
+{{if .IsUser}}
+	<li><a target="main" href="/problem">题库</a>
+	<li><a target="main" href="/submit">提交</a></li>
+{{else}}
+	<li><a target="main" href="/adminproblem">题库</a>
+{{end}}
+	<li><a target="main" href="/status">状态</a></li>
+	<li><a target="main" href="/standing">排名</a></li>
+	<!--li><a target="main" href="collect.php">汇总</a></li-->
+{{end}}
+	<li><a target="main" href="/faq">帮助</a></li>
+
+{{if .IsLogin}}
+	<li>----</li>
+	<li><a target="_top" href="/logout" onclick="javascript:if(!window.confirm('你真的要退出吗？')){return false}">退出</a></li>
+{{end}}
+	</ul>
+
+</body>
+</html>

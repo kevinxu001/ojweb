@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="zh-cn">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>KingOJ - 检测用户</title>
+<link href="/static/css/style.css" type="text/css" rel="stylesheet">
+<meta http-equiv="Refresh" content="2; URL=/left">
+</head>
+
+<body>
+
+{{if .IsError}}
+	<div class="msg1" style="display:block;">{{.ErrorMsg}}</div>
+
+	<div class="msg2"><a href="/reg" target="main">注册新用户</a></div>
+{{else}}
+	<div id="timer"></div>
+	<div class="msg1">{{.UserName}}</div>
+	<div class="msg2">登录成功<br />欢迎到来<br /><a href="/" target="_top">返回首页</a></div>
+{{end}}
+</body>
+</html>

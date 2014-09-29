@@ -1,0 +1,88 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="zh-cn">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>KingOJ - 注册</title>
+<link href="/static/css/style.css" type="text/css" rel="stylesheet">
+</head>
+
+<body>
+<h1>KingOJ - 注册</h1>
+<hr>
+{{if .IsGet}}
+	<form name="form1" method="post" action="/reg" onSubmit="return CheckForm();">
+	<p align="left" class="pt9">账号：
+	<input name="user" type="text" id="user" size="10">
+	（支持中文。请用真实姓名。为了便于老师整理，每人只准注册一个账号。）
+	<p align="left" class="pt9">密码：
+	<input name="pass" type="password" id="pass" size="10">
+	（没有密码找回功能。请记住自己的密码。）</p>
+	<input class="frm" style="width: 90px" type="submit" value="注册">
+  </form>
+<script language="JavaScript" type="text/javascript">
+
+//启动获得焦点
+SetFocus();
+function SetFocus()
+{
+	if (document.form1.user.value==""){
+		document.form1.user.focus();
+	}else{
+		document.form1.pass.focus();
+	}
+}
+
+function CheckForm()
+{
+	var strBadChar=" +-*/\\#$%&@|~^`,;.?!\'\"()[]{}<>＇－—―！＂＃％＆（），、．。／：；？＠［＼］＿｀ˋ｛｜｝～¨￣ˉˊˇ˙‖‘’“”〈︿〉《》「」『』【】〔〕〖〗〃＋⊙＜＝＞±×÷∈∏∑√∝∠∥∧∨∩∪∫∮∴∵∶∷∽≈≌≠≡≤≥≮≯⊥⌒■□▲△◆◇○◎●↑→↓←─━┄┅┈┉│┃┆┇┊┋┌┍┎┏┐┑┒┓└┕┖┗┘┙┚┛├┝┞┟┠┡┢┣┤┥┦┧┨┩┪┫┬┭┮┯┰┱┲┳┴┵┶┷┸┹┺┻┼┽┾┿╀╁╂╃╄╅╆╇╈╉╊╋¤￥§°·…‰※〓☆★♀♂€①⑴⒈Ⅰ②⑵⒉Ⅱ③⑶⒊Ⅲ④⑷⒋Ⅳ⑤⑸⒌Ⅴ⑥⑹⒍Ⅵ⑦⑺⒎Ⅶ⑧⑻⒏Ⅷ⑨⑼⒐Ⅸ⑩⑽⒑Ⅹ⑾⒒Ⅺ⑿⒓Ⅻ⒀⒔⒁⒕⒂⒖⒃⒗⒄⒘⒅⒙⒆⒚⒇⒛∞áàǎā℃éèêěēíìǐī№óòǒōúùüǔūǘǜǚǖαΑβΒγΓδΔεΕζΖηΗθΘιΙκΚλΛμΜνΝξΞοΟπΠρΡσΣτΤυΥφΦχΧψΨωΩаАбБвВгГдДеЕёЁжЖзЗиИйЙкКлЛмМнНоОпПрРсСтТуУфФхХцЦчЧшШщЩъЪыЫьЬэЭюЮяЯァぁアあィぃイいゥぅウうヴェぇエえォぉオおヵカかガがキきギぎクくグぐケけゲげコこゴごサさザざシしジじスすズずセせゼぜソそゾぞタたダだチちヂぢッっツつヅづテてデでトとドどナなニにヌぬネねノのハはバばパぱヒひビびピぴフふブぶプぷヘへベべペぺホほボぼポぽマまミみムむメめモもャゃヤやュゅユゆョょヨよラらリりルるレれロろヮゎワわヰゐヱゑヲをンんㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦㄧㄨㄩ㈧㈡㈨㈥㈦㈢㈩㈣㈤㈠々";
+	var user=document.form1.user.value;
+	var pass=document.form1.pass.value;
+
+	var len = user.match(/[^ -~]/g) == null ? user.length : user.length + user.match(/[^ -~]/g).length ;
+	//求用户名的真实长度
+	if(len<3){
+		alert("姓名至少4个英文字符或2个中文字符。请重新输入！");
+		document.form1.user.focus();
+		document.form1.user.select();
+		return false;
+	}
+
+	if(user=="admin"){
+		alert("非法用户名！");
+		document.form1.user.focus();
+		document.form1.user.select();
+		return false;
+	}
+
+	for(var i=0;i<strBadChar.length;i++){
+		if (user.indexOf(strBadChar.charAt(i)) !== -1){
+			alert("用户名含有非法字符“" + strBadChar.charAt(i) + "”，请重新输入！");
+			document.form1.user.focus();
+			document.form1.user.select();
+			return false;
+		}
+	}
+
+	if(pass.length<6){
+		alert("密码至少6个英文字符。请重新输入！");
+		document.form1.pass.focus();
+		document.form1.pass.select();
+		return false;
+	}
+
+	return true;
+}
+
+</script>
+
+{{else}}
+	{{if .IsError}}
+		<font color=red>{{.ErrorMsg}}</font><a href="/reg" target="_self">返回</a>
+	{{else}}
+		{{.ExecOut}}
+	{{end}}
+{{end}}
+</body>
+</html>
+
