@@ -14,9 +14,11 @@ func init() {
 	beego.Router("/match", &controllers.IndexController{}, "*:Match")
 	beego.Router("/reg", &controllers.IndexController{}, "*:Reg")
 	beego.Router("/problem", &controllers.IndexController{}, "get:Problem")
-	beego.Router("/submit", &controllers.IndexController{}, "get:Submit")
+	beego.Router("/submit", &controllers.IndexController{}, "*:Submit")
 	beego.Router("/adminproblem", &controllers.IndexController{}, "get:Problem")
 	beego.Router("/status", &controllers.IndexController{}, "get:Status")
 	beego.Router("/standing", &controllers.IndexController{}, "get:Standing")
 	beego.Router("/faq", &controllers.IndexController{}, "get:Faq")
+	//调用显示上交程序的API回传
+	beego.Router("/api/showprog", &controllers.IndexController{}, "get:ShowProg")
 }

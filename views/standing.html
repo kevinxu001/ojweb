@@ -6,7 +6,7 @@
 <title>KingOJ - 排行</title>
 <meta http-equiv="Refresh" content="60; URL=/standing">
 <link href="/static/css/style.css" type="text/css" rel="stylesheet">
-<script>var myName='<?echo $_COOKIE['luser']?>';</script>
+<script>var myName='{{.UserName}}';</script>
 <script type="text/javascript" src="/static/js/jquery-1.4.4.js"></script>
 <script type="text/javascript" src="/static/js/jquery.table.js"></script>
 <script>
@@ -18,7 +18,7 @@
 			}
 		})
 
-		$("tbody tr:has(td:contains('"+myName+"')) td").each(function(i){
+		$("tbody tr:has(td:contains('"+myName+"')[innerText='"+myName+"']) td").each(function(i){
 			var txt=$.trim($(this).text());
 			if(!txt){//未做的
 				$(this).html("<a href=\"problem?probname=" + $("thead tr th:nth-child(" + (i + 1) + ")").text() + "\">未做</a>");

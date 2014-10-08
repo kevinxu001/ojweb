@@ -1,0 +1,12 @@
+{{if .IsError}}
+	{{.ErrorMsg}}
+{{else}}
+
+<h3>{{.ProgName}}</h3>
+<h4>提交序号:{{.ProgId}},学生:{{.ProgUser}},语言:{{.ProgLang}},IP:{{.ProgIp}}</h4>
+
+<pre>
+{{.ProgContent | str2html}}
+</pre>
+
+{{end}}

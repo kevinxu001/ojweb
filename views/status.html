@@ -5,15 +5,34 @@
 	<title>KingOJ - 状态</title>
 	<meta http-equiv="Refresh" content="30; URL=/status">
 	<link href="/static/css/style.css" type="text/css" rel="stylesheet">
-	<script>var myName='<?echo $_COOKIE['luser']?>';</script>
-	<script type="text/javascript" src="/static/js/jquery-1.4.4.js"></script>
+	<script>var myName='{{.UserName}}';</script>
+	
+	<script type="text/javascript" src="/static/js/jquery-1.9.0.min.js"></script>
 	<script type="text/javascript" src="/static/js/jquery.table.js"></script>
+
+	<!-- Add fancyBox -->
+	<link rel="stylesheet" href="/static/js/jquery-fancybox-2.1.5/jquery.fancybox.css?v=2.1.5" type="text/css" media="screen" />
+	<script type="text/javascript" src="/static/js/jquery-fancybox-2.1.5/jquery.fancybox.pack.js?v=2.1.5"></script>
+
 	<script>
 	$(function() {
 		$("tbody td:nth-child(2)").each(function(i){
 			var txt=$.trim($(this).text());
 			$(this).html("<a href=\"problem?probname=" + txt + "\">" + txt + "</a>");
 		});
+
+		$(".showprog").fancybox({
+			maxWidth	: 800,
+			maxHeight	: 600,
+			fitToView	: false,
+			width		: '70%',
+			height		: '70%',
+			autoSize	: false,
+			closeClick	: false,
+			openEffect	: 'none',
+			closeEffect	: 'none'
+		});
+
 	});
 
 	function RndNum(n){

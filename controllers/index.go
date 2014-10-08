@@ -1,12 +1,15 @@
 package controllers
 
 import (
+	"bufio"
 	"fmt"
 	"github.com/astaxie/beego"
+	"strings"
+	// iconv "github.com/djimenez/iconv-go"
+	"code.google.com/p/mahonia"
 	"io"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"regexp"
 	"strconv"
 	"time"
@@ -22,6 +25,23 @@ func (this *IndexController) Index() {
 
 func (this *IndexController) Left() {
 	this.TplNames = "left.html"
+
+	//用户登陆状态
+	vadmin := this.GetSession("adminUser")
+	if admin_user, ok := vadmin.(string); ok && admin_user == beego.AppConfig.String("admin_user") {
+		this.Data["IsLogin"] = true
+		this.Data["IsAdmin"] = true
+
+		this.Data["UserName"] = beego.AppConfig.String("admin_realname")
+	}
+
+	v := this.GetSession("currentUser")
+	if current_user, ok := v.(string); ok {
+		this.Data["IsLogin"] = true
+		this.Data["IsUser"] = true
+
+		this.Data["UserName"] = current_user
+	}
 
 	//比赛开始时间读取
 	var durationSeconds, startTime int64
@@ -41,24 +61,6 @@ func (this *IndexController) Left() {
 		this.Data["IsMatchStart"] = true
 	}
 	this.Data["DurationSeconds"] = durationSeconds
-
-	//用户登陆状态
-	vadmin := this.GetSession("adminUser")
-	if admin_user, ok := vadmin.(string); ok && admin_user == beego.AppConfig.String("admin_user") {
-		this.Data["IsLogin"] = true
-		this.Data["IsAdmin"] = true
-
-		this.Data["UserName"] = beego.AppConfig.String("admin_realname")
-	}
-
-	v := this.GetSession("currentUser")
-	if current_user, ok := v.(string); ok {
-		this.Data["IsLogin"] = true
-		this.Data["IsUser"] = true
-
-		this.Data["UserName"] = current_user
-	}
-
 }
 
 func (this *IndexController) Right() {
@@ -106,7 +108,7 @@ func (this *IndexController) Check() {
 	defer fuser.Close()
 
 	//'teacher'=8d788385431273d11e8b43bb78f3aa41
-	reguserinfo := regexp.MustCompile(`\'([\p{Han}]|[0-9A-Za-z])*\'=.*\n`)
+	reguserinfo := regexp.MustCompile(`\'` + username + `\'=.*\n`)
 	var finduserinfo string
 
 	// bf := bufio.NewReader(fuser)
@@ -185,7 +187,7 @@ func (this *IndexController) Reg() {
 	this.TplNames = "reg.html"
 
 	this.Data["AdminUserName"] = beego.AppConfig.String("admin_user")
-	beego.Info(this.Ctx.Request.Method)
+	// beego.Info(this.Ctx.Request.Method)
 	if this.Ctx.Request.Method == "GET" {
 		this.Data["IsGet"] = true
 	} else if this.Ctx.Request.Method == "POST" {
@@ -202,18 +204,78 @@ func (this *IndexController) Reg() {
 			return
 		}
 
-		execCmd := exec.Command("newuser.exe", username, encryptPassword)
-		execOut, err := execCmd.Output()
-		if err != nil {
-			panic(err)
+		if len(username) < 4 {
+			this.Data["IsError"] = true
+			this.Data["ErrorMsg"] = "用户名太短。至少4个英文字符或2个中文字符。"
+			return
 		}
-		this.Data["ExecOut"] = string(execOut)
+
+		if ok, _ := regexp.Match(`^([\p{Han}]|[0-9A-Za-z])*$`, []byte(username)); !ok {
+			this.Data["IsError"] = true
+			this.Data["ErrorMsg"] = "用户名\"" + username + "\"含有非法字符。"
+			return
+		}
+
+		if len(password) < 6 {
+			this.Data["IsError"] = true
+			this.Data["ErrorMsg"] = "密码太短。至少6个英文字符。"
+			return
+		}
+
+		// curdir, _ := os.Getwd()
+
+		f, err := os.OpenFile("user.txt", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0644)
+		if err != nil {
+			beego.Error(err)
+			this.Data["IsError"] = true
+			this.Data["ErrorMsg"] = "创建 user.txt 失败！"
+			return
+		}
+		defer f.Close()
+
+		//'teacher'=8d788385431273d11e8b43bb78f3aa41
+		bf := bufio.NewReader(f)
+		reguserinfo := regexp.MustCompile(`\'([\p{Han}]|[0-9A-Za-z])*\'`)
+		var finduser string
+		for {
+			//buf,err := r.ReadBytes('\n')
+			buf, err := bf.ReadString('\n')
+			if err == io.EOF {
+				break
+			}
+
+			finduser = reguserinfo.FindString(buf)
+
+			if finduser == `'`+username+`'` {
+				this.Data["IsError"] = true
+				this.Data["ErrorMsg"] = "用户名\"" + username + "\"已经存在，请更换用户名。"
+				return
+			}
+		}
+
+		fmt.Fprintf(f, "'%s'=%s\n", username, encryptPassword)
+
+		this.Data["UserName"] = username
 	}
 
 }
 
 func (this *IndexController) Problem() {
 	this.TplNames = "problem.html"
+
+	vadmin := this.GetSession("adminUser")
+	if admin_user, ok := vadmin.(string); ok && admin_user == beego.AppConfig.String("admin_user") {
+		this.Data["IsLogin"] = true
+		this.Data["IsAdmin"] = true
+		this.Data["UserName"] = admin_user
+	}
+
+	v := this.GetSession("currentUser")
+	if current_user, ok := v.(string); ok {
+		this.Data["IsLogin"] = true
+		this.Data["IsUser"] = true
+		this.Data["UserName"] = current_user
+	}
 
 	//比赛开始时间读取
 	var startTime int64
@@ -233,20 +295,6 @@ func (this *IndexController) Problem() {
 		return
 	}
 
-	vadmin := this.GetSession("adminUser")
-	if admin_user, ok := vadmin.(string); ok && admin_user == beego.AppConfig.String("admin_user") {
-		this.Data["IsLogin"] = true
-		this.Data["IsAdmin"] = true
-		this.Data["UserName"] = admin_user
-	}
-
-	v := this.GetSession("currentUser")
-	if current_user, ok := v.(string); ok {
-		this.Data["IsLogin"] = true
-		this.Data["IsUser"] = true
-		this.Data["UserName"] = current_user
-	}
-
 	probName := this.GetString("probname")
 	if probName == "" {
 		this.Data["IsProbList"] = true
@@ -258,13 +306,27 @@ func (this *IndexController) Problem() {
 			}
 			defer fprob.Close()
 
+			var buf string
+			n, _ := fmt.Fscanf(fprob, "%s\r", &buf)
+			isWin := n > 0
+			if isWin {
+				fprob.Seek(0, os.SEEK_SET)
+			}
+
 			var probnum int
-			fmt.Fscanf(fprob, "%d", &probnum)
+			bfprob := bufio.NewReader(fprob)
+			ret, _ := bfprob.ReadString('\n')
+			if isWin {
+				if n := strings.LastIndex(ret, "\r\n"); n >= 0 {
+					ret = ret[:n]
+				}
+			}
+			probnum, _ = strconv.Atoi(ret)
 
 			var hasProbset bool
 			var fprobset *os.File
 			if _, err := os.Stat("probset.txt"); err == nil {
-				fprobset, err := os.OpenFile("probset.txt", os.O_RDONLY, 0644)
+				fprobset, err = os.OpenFile("probset.txt", os.O_RDONLY, 0644)
 				if err != nil {
 					beego.Error(err)
 				}
@@ -284,20 +346,38 @@ func (this *IndexController) Problem() {
 
 			probInfos := make([]*ProbInfo, 0, probnum)
 
+			var pname string
 			id := 0
 			for {
 				probinfo := new(ProbInfo)
 
-				n, _ := fmt.Fscanf(fprob, "%s", &probinfo.ProbName)
-				if n == 0 {
+				//兼容WIN下的换行符号读入
+				// fmt.Fscanf(fprob, "%d", &buf)
+				// if buf != 0 {
+				// 	fprob.Seek(-1, os.SEEK_CUR)
+				// }
+
+				pname, err = bfprob.ReadString('\n')
+				if err == io.EOF && len(pname) == 0 {
 					break
+				}
+
+				//转换WIN下gb18030 to utf-8
+				if isWin {
+					// pname=strings.TrimSpace(pname)
+					if n := strings.LastIndex(pname, "\r\n"); n >= 0 {
+						pname = pname[:n]
+					}
+					dec := mahonia.NewDecoder("gb18030")
+					probinfo.ProbName = dec.ConvertString(pname)
 				}
 
 				id++
 				probinfo.Id = id
 
 				if hasProbset {
-					n, _ = fmt.Fscanf(fprobset, "%d %d", &probinfo.AcTotal, &probinfo.SubTotal)
+					_, err = fmt.Fscanf(fprobset, "%d %d\n", &probinfo.AcTotal, &probinfo.SubTotal)
+					// beego.Info(probinfo.AcTotal, probinfo.SubTotal)
 				}
 
 				if probinfo.SubTotal > 0 {
@@ -306,11 +386,21 @@ func (this *IndexController) Problem() {
 
 				probInfos = append(probInfos, probinfo)
 			}
+			// converter.Close()
 
 			this.Data["ProbInfos"] = probInfos
 		}
 	} else {
 		this.Data["ProbName"] = probName
+
+		fprob, err := os.OpenFile("prob.txt", os.O_RDONLY, 0644)
+		if err != nil {
+			beego.Error(err)
+		}
+		defer fprob.Close()
+		var buf string
+		n, _ := fmt.Fscanf(fprob, "%s\r", &buf)
+		isWin := n > 0
 
 		if _, err := os.Stat("prob/" + probName + "/prob.html"); err != nil {
 			beego.Error(err)
@@ -327,7 +417,14 @@ func (this *IndexController) Problem() {
 
 			var probhtml []byte
 			probhtml, _ = ioutil.ReadAll(fprobhtml)
-			this.Data["ProbHtml"] = string(probhtml)
+			//转换WIN下gb18030 to utf-8
+			if isWin {
+				dec := mahonia.NewDecoder("gb18030")
+				this.Data["ProbHtml"] = dec.ConvertString(string(probhtml))
+			} else {
+				this.Data["ProbHtml"] = string(probhtml)
+			}
+
 		}
 	}
 
@@ -335,6 +432,20 @@ func (this *IndexController) Problem() {
 
 func (this *IndexController) Submit() {
 	this.TplNames = "submit.html"
+
+	vadmin := this.GetSession("adminUser")
+	if admin_user, ok := vadmin.(string); ok && admin_user == beego.AppConfig.String("admin_user") {
+		this.Data["IsLogin"] = true
+		this.Data["IsAdmin"] = true
+		this.Data["UserName"] = admin_user
+	}
+
+	v := this.GetSession("currentUser")
+	if current_user, ok := v.(string); ok {
+		this.Data["IsLogin"] = true
+		this.Data["IsUser"] = true
+		this.Data["UserName"] = current_user
+	}
 
 	//比赛开始时间读取
 	var startTime int64
@@ -354,20 +465,6 @@ func (this *IndexController) Submit() {
 		return
 	}
 
-	vadmin := this.GetSession("adminUser")
-	if admin_user, ok := vadmin.(string); ok && admin_user == beego.AppConfig.String("admin_user") {
-		this.Data["IsLogin"] = true
-		this.Data["IsAdmin"] = true
-		this.Data["UserName"] = admin_user
-	}
-
-	v := this.GetSession("currentUser")
-	if current_user, ok := v.(string); ok {
-		this.Data["IsLogin"] = true
-		this.Data["IsUser"] = true
-		this.Data["UserName"] = current_user
-	}
-
 	probName := this.GetString("probname")
 	if probName == "" {
 		this.Data["IsProbList"] = true
@@ -380,9 +477,16 @@ func (this *IndexController) Submit() {
 				this.Data["ErrorMsg"] = "找不到题目！"
 			}
 			defer fprob.Close()
+			var buf string
+			n, _ := fmt.Fscanf(fprob, "%s\r", &buf)
+			isWin := n > 0
+			if isWin {
+				fprob.Seek(0, os.SEEK_SET)
+			}
 
-			var probnum int
-			fmt.Fscanf(fprob, "%d", &probnum)
+			bfprob := bufio.NewReader(fprob)
+			ret, _ := bfprob.ReadString('\n')
+			probnum, _ := strconv.Atoi(ret)
 
 			type ProbInfo struct {
 				Id       int
@@ -391,13 +495,23 @@ func (this *IndexController) Submit() {
 
 			probInfos := make([]*ProbInfo, 0, probnum)
 
+			var pname string
 			id := 0
 			for {
 				probinfo := new(ProbInfo)
 
-				n, _ := fmt.Fscanf(fprob, "%s", &probinfo.ProbName)
-				if n == 0 {
+				pname, err = bfprob.ReadString('\n')
+				if err == io.EOF && len(pname) == 0 {
 					break
+				}
+
+				//转换WIN下gb18030 to utf-8
+				if isWin {
+					if n := strings.LastIndex(pname, "\r\n"); n >= 0 {
+						pname = pname[:n]
+					}
+					dec := mahonia.NewDecoder("gb18030")
+					probinfo.ProbName = dec.ConvertString(pname)
 				}
 
 				id++
@@ -431,19 +545,28 @@ func (this *IndexController) Submit() {
 		defer file.Close()
 
 		//读入最后更新ID
-		ftail, err := os.OpenFile("tail.txt", os.O_RDWR|os.O_TRUNC, 0644)
+		ftailr, err := os.OpenFile("tail.txt", os.O_RDONLY, 0644)
 		if err != nil {
 			beego.Error(err)
 			this.Data["IsError"] = true
 			this.Data["ErrorMsg"] = "找不到 tail.txt 文件！"
 			return
 		}
-		defer ftail.Close()
+		defer ftailr.Close()
 
 		var tailid int
-		fmt.Fscanf(ftail, "%d", &tailid)
+		fmt.Fscanf(ftailr, "%d", &tailid)
+
+		ftailw, err := os.OpenFile("tail.txt", os.O_WRONLY|os.O_TRUNC, 0644)
+		if err != nil {
+			beego.Error(err)
+			this.Data["IsError"] = true
+			this.Data["ErrorMsg"] = "找不到 tail.txt 文件！"
+			return
+		}
+		defer ftailw.Close()
 		tailid++
-		fmt.Fprintf(ftail, "%d", tailid)
+		fmt.Fprintf(ftailw, "%d", tailid)
 
 		// curdir, err := os.Getwd()
 
@@ -514,6 +637,17 @@ func (this *IndexController) Submit() {
 
 		fmt.Fprintf(fsubprob, "%s", probName)
 
+		fsubip, err := os.OpenFile(tofilepath+"ip.txt", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+		if err != nil {
+			beego.Error(err)
+			this.Data["IsError"] = true
+			this.Data["ErrorMsg"] = "无法创建 " + tofilepath + "ip.txt 文件！"
+			return
+		}
+		defer fsubip.Close()
+
+		fmt.Fprintf(fsubip, "%s", this.Ctx.Input.IP())
+
 		fsublang, err := os.OpenFile(tofilepath+"lang.txt", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 		if err != nil {
 			beego.Error(err)
@@ -543,6 +677,7 @@ func (this *IndexController) Submit() {
 
 		io.Copy(f, file)
 
+		CopyFile(tofilepath+"test.bat", "prob/"+probName+"/test.bat")
 	}
 
 }
@@ -568,6 +703,20 @@ func (this *IndexController) AdminProblem() {
 func (this *IndexController) Status() {
 	this.TplNames = "status.html"
 
+	vadmin := this.GetSession("adminUser")
+	if admin_user, ok := vadmin.(string); ok && admin_user == beego.AppConfig.String("admin_user") {
+		this.Data["IsLogin"] = true
+		this.Data["IsAdmin"] = true
+		this.Data["UserName"] = admin_user
+	}
+
+	v := this.GetSession("currentUser")
+	if current_user, ok := v.(string); ok {
+		this.Data["IsLogin"] = true
+		this.Data["IsUser"] = true
+		this.Data["UserName"] = current_user
+	}
+
 	//比赛开始时间读取
 	var startTime int64
 	if _, err := os.Stat("time.txt"); err == nil {
@@ -584,20 +733,6 @@ func (this *IndexController) Status() {
 		this.Data["IsMatchStart"] = true
 	} else {
 		return
-	}
-
-	vadmin := this.GetSession("adminUser")
-	if admin_user, ok := vadmin.(string); ok && admin_user == beego.AppConfig.String("admin_user") {
-		this.Data["IsLogin"] = true
-		this.Data["IsAdmin"] = true
-		this.Data["UserName"] = admin_user
-	}
-
-	v := this.GetSession("currentUser")
-	if current_user, ok := v.(string); ok {
-		this.Data["IsLogin"] = true
-		this.Data["IsUser"] = true
-		this.Data["UserName"] = current_user
 	}
 
 	if _, err := os.Stat("status.html"); err != nil {
@@ -622,6 +757,20 @@ func (this *IndexController) Status() {
 func (this *IndexController) Standing() {
 	this.TplNames = "standing.html"
 
+	vadmin := this.GetSession("adminUser")
+	if admin_user, ok := vadmin.(string); ok && admin_user == beego.AppConfig.String("admin_user") {
+		this.Data["IsLogin"] = true
+		this.Data["IsAdmin"] = true
+		this.Data["UserName"] = admin_user
+	}
+
+	v := this.GetSession("currentUser")
+	if current_user, ok := v.(string); ok {
+		this.Data["IsLogin"] = true
+		this.Data["IsUser"] = true
+		this.Data["UserName"] = current_user
+	}
+
 	//比赛开始时间读取
 	var startTime int64
 	if _, err := os.Stat("time.txt"); err == nil {
@@ -638,20 +787,6 @@ func (this *IndexController) Standing() {
 		this.Data["IsMatchStart"] = true
 	} else {
 		return
-	}
-
-	vadmin := this.GetSession("adminUser")
-	if admin_user, ok := vadmin.(string); ok && admin_user == beego.AppConfig.String("admin_user") {
-		this.Data["IsLogin"] = true
-		this.Data["IsAdmin"] = true
-		this.Data["UserName"] = admin_user
-	}
-
-	v := this.GetSession("currentUser")
-	if current_user, ok := v.(string); ok {
-		this.Data["IsLogin"] = true
-		this.Data["IsUser"] = true
-		this.Data["UserName"] = current_user
 	}
 
 	if _, err := os.Stat("rank.html"); err != nil {
@@ -677,4 +812,89 @@ func (this *IndexController) Standing() {
 func (this *IndexController) Faq() {
 	this.TplNames = "faq.html"
 
+}
+
+func CopyFile(dstName, srcName string) (written int64, err error) {
+	src, err := os.Open(srcName)
+	if err != nil {
+		return
+	}
+	defer src.Close()
+	dst, err := os.OpenFile(dstName, os.O_WRONLY|os.O_CREATE, 0644)
+	if err != nil {
+		return
+	}
+	defer dst.Close()
+	return io.Copy(dst, src)
+}
+
+//从指定的文件名中读出string
+func readFile(filename string) string {
+	f, err := os.OpenFile(filename, os.O_RDONLY, 0644)
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+
+	var str string
+	bf := bufio.NewReader(f)
+	str, _ = bf.ReadString('\n')
+	// fmt.Fscanf(f, "%s\n", &str)
+
+	return str
+}
+
+func (this *IndexController) ShowProg() {
+	this.TplNames = "showprog.html"
+
+	vadmin := this.GetSession("adminUser")
+
+	if admin_user, ok := vadmin.(string); ok && admin_user == beego.AppConfig.String("admin_user") {
+		this.Data["IsLogin"] = true
+		this.Data["IsAdmin"] = true
+		this.Data["UserName"] = admin_user
+	} else {
+		this.Data["IsError"] = true
+		this.Data["ErrorMsg"] = "你不是老师,没有权限查看!"
+		return
+	}
+
+	progid := this.GetString("id")
+
+	progfilepath := "submit/" + progid + "/"
+
+	lang := readFile(progfilepath + "lang.txt")
+
+	var prog string
+	if lang[:3] == "PAS" {
+		prog = progfilepath + "prog.pas"
+	} else if lang[:3] == "C++" {
+		prog = progfilepath + "prog.cpp"
+	}
+
+	// beego.Info(prog)
+
+	proguser := readFile(progfilepath + "user.txt")
+
+	progname := readFile(progfilepath + "prob.txt")
+
+	progip := readFile(progfilepath + "ip.txt")
+
+	fprog, err := os.OpenFile(prog, os.O_RDONLY, 0644)
+	if err != nil {
+		this.Data["IsError"] = true
+		this.Data["ErrorMsg"] = "程序文件不存在!"
+		return
+	}
+	defer fprog.Close()
+
+	var progcontent []byte
+	progcontent, _ = ioutil.ReadAll(fprog)
+
+	this.Data["ProgUser"] = proguser
+	this.Data["ProgName"] = progname
+	this.Data["ProgIp"] = progip
+	this.Data["ProgLang"] = lang
+	this.Data["ProgId"] = progid
+	this.Data["ProgContent"] = string(progcontent)
 }
